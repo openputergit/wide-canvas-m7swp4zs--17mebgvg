@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberVoice Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background: #0a0a1f;
+            background-image: linear-gradient(45deg, #0a0a1f 25%, #141432 25%, #141432 50%, #0a0a1f 50%, #0a0a1f 75%, #141432 75%, #141432 100%);
+            background-size: 56.57px 56.57px;
+        }
+        .neon-border {
+            box-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff; }
+            50% { box-shadow: 0 0 15px #0ff, 0 0 25px #0ff, 0 0 35px #0ff; }
+            100% { box-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff; }
+        }
+        .ripple {
+            background: radial-gradient(circle, #00ffff 1%, transparent 60%);
+            animation: ripple-effect 1s infinite;
+        }
+        @keyframes ripple-effect {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-gray-900 rounded-xl p-6 neon-border">
+        <h1 class="text-3xl text-cyan-400 text-center mb-8">CyberVoice 2077</h1>
+        
+        <div class="relative mb-8">
+            <div class="w-32 h-32 mx-auto rounded-full bg-gray-800 flex items-center justify-center relative">
+                <div class="ripple absolute w-full h-full rounded-full"></div>
+                <button id="startBtn" class="w-24 h-24 rounded-full bg-cyan-500 hover:bg-cyan-400 transition-all flex items-center justify-center">
+                    <i class="bi bi-mic-fill text-4xl text-gray-900"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <div id="output" class="bg-gray-800 p-4 rounded-lg text-cyan-400 min-h-[100px] break-words">
+                Waiting for your command...
+            </div>
+            
+            <div class="text-sm text-gray-400">
+                <p class="mb-2">Try saying:</p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li>"Open Google"</li>
+                    <li>"Send email to [email]"</li>
+                    <li>"Send WhatsApp message"</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const output = document.getElementById('output');
+        let recognition;
+
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                output.textContent = "Listening...";
+                startBtn.querySelector('i').classList.replace('bi-mic-fill', 'bi-mic-mute-fill');
+            };
+
+            recognition.onend = () => {
+                startBtn.querySelector('i').classList.replace('bi-mic-mute-fill', 'bi-mic-fill');
+            };
+
+            recognition.onresult = (event) => {
+                const command = event.results[0][0].transcript.toLowerCase();
+                output.textContent = `Command received: ${command}`;
+
+                // Process commands
+                if (command.includes('open google')) {
+                    window.open('https://www.google.com', '_blank');
+                } else if (command.includes('send email')) {
+                    const mailTo = "mailto:?subject=Voice Assistant Email&body=This email was initiated by voice command";
+                    window.location.href = mailTo;
+                } else if (command.includes('send whatsapp')) {
+                    window.open('https://web.whatsapp.com', '_blank');
+                }
+            };
+
+            recognition.onerror = (event) => {
+                output.textContent = `Error occurred: ${event.error}`;
+            };
+        }
+
+        startBtn.addEventListener('click', () => {
+            if (recognition) {
+                recognition.start();
+            } else {
+                output.textContent = "Speech recognition is not supported in this browser.";
+            }
+        });
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
